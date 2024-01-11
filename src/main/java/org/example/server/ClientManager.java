@@ -22,9 +22,12 @@ public class ClientManager implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-            this.userName = obtainName();
+            this.userName = in.readLine();
+            out.println("Добро пожаловать в чат, " + userName + "!");
+            // TODO: log
             String messageToBroadcast = "Пользователь " + userName + " вошел в чат!";
             broadcastMessage(messageToBroadcast);
+            // TODO: log
             logMessage(messageToBroadcast);
         } catch (IOException e) {
             shutdownClient();
@@ -32,39 +35,14 @@ public class ClientManager implements Runnable {
         clients.add(this);
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
     public PrintWriter getOut() {
         return out;
-    }
-
-    private String obtainName() {
-        String input;
-        try {
-            out.println("Как вас зовут?");
-            input = in.readLine();
-            while (!isNameCorrect(input)) {
-                out.println("Некорректное имя! Имя должно быть более 2 символов, менее 13 и не быть пустым!");
-                input = in.readLine();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return input;
-    }
-
-    private boolean isNameCorrect(String input) {
-        return input.length() >= 2 && input.length() <= 13;
     }
 
     public void broadcastMessage(String message) {
         if (clients != null) {
             for (ClientManager client : clients) {
-                if (!client.getUserName().equals(userName)) {
-                    client.getOut().println(message);
-                }
+                client.getOut().println(message);
             }
         }
     }
@@ -75,14 +53,14 @@ public class ClientManager implements Runnable {
 
     private void shutdownClient() {
         try {
+            if (socket != null) {
+                socket.close();
+            }
             if (in != null) {
                 in.close();
             }
             if (out != null) {
                 out.close();
-            }
-            if (socket != null) {
-                socket.close();
             }
             removeClient();
         } catch (IOException e) {
@@ -105,8 +83,9 @@ public class ClientManager implements Runnable {
                 message = in.readLine();
                 if (EXIT_COMMAND.equals(message)) {
                     shutdownClient();
+                    break;
                 }
-                broadcastMessage(message);
+                broadcastMessage(userName + ": " + message);
                 logMessage(message);
             } catch (IOException e) {
                 shutdownClient();

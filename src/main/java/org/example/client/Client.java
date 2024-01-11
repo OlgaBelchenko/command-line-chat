@@ -7,12 +7,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
+import static java.lang.System.exit;
+
 public class Client {
 
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private String userName;
+    private final String EXIT_COMMAND = "/exit";
     // TODO: add logger
 
 
@@ -32,38 +35,39 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         while (socket.isConnected()) {
             String message = scanner.nextLine();
-            out.println(userName + ": " + message);
+            out.println(message);
+            if (EXIT_COMMAND.equals(message)) {
+                shutdownClient();
+            }
         }
     }
 
     private void listenToMessage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String messageFromServer;
-                try {
-                    while (socket.isConnected()) {
-                        messageFromServer = in.readLine();
-                        System.out.println(messageFromServer);
-                    }
-                } catch (IOException e) {
-                    shutdownClient();
+        new Thread(() -> {
+            String messageFromServer;
+            try {
+                while (socket.isConnected()) {
+                    messageFromServer = in.readLine();
+                    System.out.println(messageFromServer);
                 }
+            } catch (IOException e) {
+                shutdownClient();
             }
         }).start();
     }
 
     private void shutdownClient() {
         try {
+            if (socket != null) {
+                socket.close();
+            }
             if (in != null) {
                 in.close();
             }
             if (out != null) {
                 out.close();
             }
-            if (socket != null) {
-                socket.close();
-            }
+            exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         }
