@@ -1,5 +1,7 @@
 package org.example.server;
 
+import org.example.logger.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,13 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientManager implements Runnable {
-    public static List<ClientManager> clients = new ArrayList<>();
+    private static final List<ClientManager> clients = new ArrayList<>();
+    private static final Logger logger = Logger.getInstance();
     private final String EXIT_COMMAND = "/exit";
+    private static final String LOG_FILE_PATH = "src/main/resources/srvlog.txt";
+
     private final Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private String userName;
-    // TODO: add logger
+
 
     public ClientManager(Socket socket) {
         this.socket = socket;
@@ -24,11 +29,9 @@ public class ClientManager implements Runnable {
             out = new PrintWriter(socket.getOutputStream(), true);
             this.userName = in.readLine();
             out.println("Добро пожаловать в чат, " + userName + "!");
-            // TODO: log
             String messageToBroadcast = "Пользователь " + userName + " вошел в чат!";
+            logger.log(messageToBroadcast, LOG_FILE_PATH);
             broadcastMessage(messageToBroadcast);
-            // TODO: log
-            logMessage(messageToBroadcast);
         } catch (IOException e) {
             shutdownClient();
         }
@@ -40,15 +43,9 @@ public class ClientManager implements Runnable {
     }
 
     public void broadcastMessage(String message) {
-        if (clients != null) {
-            for (ClientManager client : clients) {
-                client.getOut().println(message);
-            }
+        for (ClientManager client : clients) {
+            client.getOut().println(message);
         }
-    }
-
-    private void logMessage(String message) {
-        // TODO
     }
 
     private void shutdownClient() {
@@ -72,7 +69,7 @@ public class ClientManager implements Runnable {
         clients.remove(this);
         String message = "Пользователь " + userName + " вышел из чата!";
         broadcastMessage(message);
-        logMessage(message);
+        logger.log(message, LOG_FILE_PATH);
     }
 
     @Override
@@ -86,7 +83,7 @@ public class ClientManager implements Runnable {
                     break;
                 }
                 broadcastMessage(userName + ": " + message);
-                logMessage(message);
+                logger.log(message, LOG_FILE_PATH);
             } catch (IOException e) {
                 shutdownClient();
                 break;
