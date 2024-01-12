@@ -19,7 +19,6 @@ public class Logger {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.printf("[%s] %s\n", dateTime, msg);
     }
 
     public static Logger getInstance() {

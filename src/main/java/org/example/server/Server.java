@@ -74,17 +74,7 @@ public class Server {
     }
 
     private static int getPort() {
-        int port = -1;
-        for (String setting : settings.keySet()) {
-            if ("port".equals(setting)) {
-                try {
-                    port = Integer.parseInt(settings.get(setting));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return port;
+        return Integer.parseInt(settings.getOrDefault("port", "-1"));
     }
 
     public static void main(String[] args) throws IOException {
@@ -96,9 +86,6 @@ public class Server {
         Server server = new Server(serverSocket);
         logger.log("Старт сервера", LOG_FILE_PATH);
         server.runServer();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.log("Сервер завершил работу", LOG_FILE_PATH);
-        }));
     }
 }
 

@@ -2,10 +2,7 @@ package org.example.server;
 
 import org.example.logger.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +15,7 @@ public class ClientManager implements Runnable {
 
     private final Socket socket;
     private BufferedReader in;
-    private PrintWriter out;
+    private BufferedWriter out;
     private String userName;
 
 
@@ -26,9 +23,11 @@ public class ClientManager implements Runnable {
         this.socket = socket;
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.userName = in.readLine();
-            out.println("Добро пожаловать в чат, " + userName + "!");
+            out.write("Добро пожаловать в чат, " + userName + "!");
+            out.newLine();
+            out.flush();
             String messageToBroadcast = "Пользователь " + userName + " вошел в чат!";
             logger.log(messageToBroadcast, LOG_FILE_PATH);
             broadcastMessage(messageToBroadcast);
@@ -38,26 +37,33 @@ public class ClientManager implements Runnable {
         clients.add(this);
     }
 
-    public PrintWriter getOut() {
+    public BufferedWriter getOut() {
         return out;
     }
 
     public void broadcastMessage(String message) {
         for (ClientManager client : clients) {
-            client.getOut().println(message);
+            try {
+                BufferedWriter writer = client.getOut();
+                writer.write(message);
+                writer.newLine();
+                writer.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private void shutdownClient() {
         try {
-            if (socket != null) {
-                socket.close();
+            if (out != null) {
+                out.close();
             }
             if (in != null) {
                 in.close();
             }
-            if (out != null) {
-                out.close();
+            if (socket != null) {
+                socket.close();
             }
             removeClient();
         } catch (IOException e) {
@@ -74,10 +80,13 @@ public class ClientManager implements Runnable {
 
     @Override
     public void run() {
-        while (socket.isConnected()) {
+        while (!socket.isClosed()) {
             try {
                 String message;
                 message = in.readLine();
+                if (message == null) {
+                    shutdownClient();
+                }
                 if (EXIT_COMMAND.equals(message)) {
                     shutdownClient();
                     break;
