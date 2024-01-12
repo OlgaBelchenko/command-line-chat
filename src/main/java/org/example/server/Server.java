@@ -1,20 +1,16 @@
 package org.example.server;
 
 import org.example.logger.Logger;
+import org.example.settings.SettingsWriter;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Server {
-
-    private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
+    private static final int PORT = 12345;
+    private static final String HOST = "127.0.0.1";
     private static final String LOG_FILE_PATH = "src/main/resources/srvlog.txt";
-    private static final Map<String, String> settings = getSettingsFromFile();
     private static Logger logger = Logger.getInstance();
     private final ServerSocket serverSocket;
     private Socket socket;
@@ -53,36 +49,10 @@ public class Server {
         }
     }
 
-    private static Map<String, String> getSettingsFromFile() {
-        Map<String, String> settings = new HashMap<>();
-        String line;
-        try (BufferedReader reader = new BufferedReader(new FileReader(SETTINGS_FILE_PATH))) {
-            while ((line = reader.readLine()) != null) {
-                if (line.length() > 1) {
-                    String[] setting = line.split(":", 2);
-                    settings.put(setting[0], setting[1]);
-                }
-            }
-        } catch (IOException e) {
-            if (logger == null) {
-                logger = Logger.getInstance();
-            }
-            logger.log(e.getMessage(), LOG_FILE_PATH);
-            e.printStackTrace();
-        }
-        return settings;
-    }
-
-    private static int getPort() {
-        return Integer.parseInt(settings.getOrDefault("port", "-1"));
-    }
-
     public static void main(String[] args) throws IOException {
-        int port = getPort();
-        if (port == -1) {
-            throw new IllegalArgumentException("Неверные настройки в файле settings.txt");
-        }
-        ServerSocket serverSocket = new ServerSocket(port);
+        SettingsWriter settings = new SettingsWriter();
+        settings.writeSettingsToFile(String.format("port:%d\nhost:%s\n", PORT, HOST));
+        ServerSocket serverSocket = new ServerSocket(PORT);
         Server server = new Server(serverSocket);
         logger.log("Старт сервера", LOG_FILE_PATH);
         server.runServer();

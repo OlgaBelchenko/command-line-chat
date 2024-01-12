@@ -17,7 +17,7 @@ public class Logger {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) {
             writer.write(String.format("[%s] %s\n", dateTime, msg));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

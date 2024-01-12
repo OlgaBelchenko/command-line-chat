@@ -1,6 +1,7 @@
 package org.example.client;
 
 import org.example.logger.Logger;
+import org.example.settings.SettingsReader;
 
 import java.io.*;
 import java.net.Socket;
@@ -100,10 +101,23 @@ public class Client {
             userName = scanner.nextLine();
             logger.log(userName, LOG_FILE_PATH);
         }
-        Socket socket = new Socket("127.0.0.1", 12345);
+        Socket socket = getSocket();
         Client client = new Client(socket, userName);
         client.listenToMessage();
         client.sendMessage();
+    }
+
+    private static Socket getSocket() throws IOException {
+        SettingsReader sr = new SettingsReader();
+        String host = sr.getHost();
+        if (host.isEmpty()) {
+            throw new IllegalArgumentException("Параметра host нет в файле настроек!)");
+        }
+        int port = sr.getPort();
+        if (port == -1) {
+            throw new IllegalArgumentException("Параметра port нет в файле настроек!)");
+        }
+        return new Socket(host, port);
     }
 
     private static boolean isUserNameCorrect(String userName) {
