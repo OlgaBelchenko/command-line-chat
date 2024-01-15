@@ -11,7 +11,7 @@ import java.util.Scanner;
 import static java.lang.System.exit;
 
 public class Server {
-    private static final int PORT = 12345;
+    private static final String PORT = "12345";
     private static final String HOST = "127.0.0.1";
     private static final String LOG_FILE_PATH = "src/main/resources/srv_log.txt";
     private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
@@ -71,9 +71,10 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        SettingsWriter settings = new SettingsWriter();
-        settings.writeSettingsToFile(String.format("port:%d\nhost:%s\n", PORT, HOST), SETTINGS_FILE_PATH);
-        ServerSocket serverSocket = new ServerSocket(PORT);
+        SettingsWriter settings = new SettingsWriter(SETTINGS_FILE_PATH);
+        settings.writeSetting("port", PORT);
+        settings.writeSetting("host", HOST);
+        ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT));
         Server server = new Server(serverSocket);
         server.runServer();
     }

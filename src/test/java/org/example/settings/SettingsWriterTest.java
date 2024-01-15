@@ -12,10 +12,10 @@ class SettingsWriterTest {
 
     @Test
     void test_writeSettingsToFile() {
-        SettingsWriter writer = new SettingsWriter();
         String filePath = "src/main/resources/test_res/test_settings_writer.txt";
+        SettingsWriter writer = new SettingsWriter(filePath);
         String msg = "Test Message";
-        writer.writeSettingsToFile(msg, filePath);
+        writer.writeSetting(msg, filePath);
         boolean result = false;
         try (Scanner scanner = new Scanner(new File(filePath))) {
             while (scanner.hasNextLine()) {

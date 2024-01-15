@@ -16,9 +16,9 @@ class SettingsReaderTest {
 
     @BeforeAll
     static void writeSettingsToFile() {
-        SettingsWriter settingsWriter = new SettingsWriter();
-        String msg = String.format("port:%d\nhost:%s\n", Integer.parseInt(PORT), HOST);
-        settingsWriter.writeSettingsToFile(msg, filePath);
+        SettingsWriter settingsWriter = new SettingsWriter(filePath);
+        settingsWriter.writeSetting("port", PORT);
+        settingsWriter.writeSetting("host", HOST);
     }
 
     @Test
