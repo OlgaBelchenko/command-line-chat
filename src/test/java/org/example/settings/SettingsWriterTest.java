@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SettingsWriterTest {
 
     @Test
-    void test_writeSettingsToFile() {
+    void test_writeSetting() {
         String filePath = "src/main/resources/test_res/test_settings_writer.txt";
         SettingsWriter writer = new SettingsWriter(filePath);
         String msg = "Test Message";

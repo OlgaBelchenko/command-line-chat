@@ -36,7 +36,7 @@ class LoggerTest {
 
     @AfterEach
     void emptyTestFile() {
-        try (PrintWriter writer = new PrintWriter(filePath)){
+        try (PrintWriter writer = new PrintWriter(filePath)) {
             writer.print("");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

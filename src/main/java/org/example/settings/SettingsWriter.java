@@ -8,7 +8,7 @@ public class SettingsWriter {
 
 
     private final Map<String, String> settings = new HashMap<>();
-    private String settingsFilePath;
+    private final String settingsFilePath;
 
     public SettingsWriter(String settingsFilePath) {
         this.settingsFilePath = settingsFilePath;
