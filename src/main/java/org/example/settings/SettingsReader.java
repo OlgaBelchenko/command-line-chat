@@ -8,24 +8,21 @@ import java.util.Map;
 
 public class SettingsReader {
 
-    private final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
+    private final String settingsFilePath;
     private final Map<String, String> settings = new HashMap<>();
 
-    public SettingsReader() {
+    public SettingsReader(String settingsFilePath) {
+        this.settingsFilePath = settingsFilePath;
         fillSettingsMap();
     }
 
-    public int getPort() {
-        return Integer.parseInt(settings.getOrDefault("port", "-1"));
-    }
-
-    public String getHost() {
-        return settings.getOrDefault("host", "");
+    public String getSetting(String setting) {
+        return settings.getOrDefault(setting, "");
     }
 
     private void fillSettingsMap() {
         String line;
-        try (BufferedReader reader = new BufferedReader(new FileReader(SETTINGS_FILE_PATH))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(settingsFilePath))) {
             while ((line = reader.readLine()) != null) {
                 if (line.length() > 1) {
                     String[] setting = line.split(":", 2);

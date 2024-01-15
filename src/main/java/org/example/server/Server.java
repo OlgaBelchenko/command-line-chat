@@ -6,12 +6,16 @@ import org.example.settings.SettingsWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
+
+import static java.lang.System.exit;
 
 public class Server {
     private static final int PORT = 12345;
     private static final String HOST = "127.0.0.1";
-    private static final String LOG_FILE_PATH = "src/main/resources/srvlog.txt";
-    private static Logger logger = Logger.getInstance();
+    private static final String LOG_FILE_PATH = "src/main/resources/srv_log.txt";
+    private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
+    private static final Logger logger = Logger.getInstance();
     private final ServerSocket serverSocket;
     private Socket socket;
 
@@ -20,6 +24,8 @@ public class Server {
     }
 
     public void runServer() {
+        logger.log("Старт сервера", LOG_FILE_PATH);
+        new Thread(this::waitForExitCommand).start();
         try {
             while (!serverSocket.isClosed()) {
                 socket = serverSocket.accept();
@@ -34,6 +40,20 @@ public class Server {
         }
     }
 
+    private void waitForExitCommand() {
+        Scanner scanner = new Scanner(System.in);
+        final String SHUTDOWN_COMMAND = "shutdown";
+        String command;
+        while (true) {
+            System.out.println("Для завершения работы сервера введите shutdown");
+            command = scanner.nextLine();
+            if (SHUTDOWN_COMMAND.equals(command)) {
+                shutdownServer();
+                break;
+            }
+        }
+    }
+
     private void shutdownServer() {
         try {
             if (serverSocket != null) {
@@ -43,6 +63,7 @@ public class Server {
                 socket.close();
             }
             logger.log("Сервер завершил работу", LOG_FILE_PATH);
+            exit(0);
         } catch (IOException e) {
             logger.log(e.getMessage(), LOG_FILE_PATH);
             e.printStackTrace();
@@ -51,10 +72,9 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         SettingsWriter settings = new SettingsWriter();
-        settings.writeSettingsToFile(String.format("port:%d\nhost:%s\n", PORT, HOST));
+        settings.writeSettingsToFile(String.format("port:%d\nhost:%s\n", PORT, HOST), SETTINGS_FILE_PATH);
         ServerSocket serverSocket = new ServerSocket(PORT);
         Server server = new Server(serverSocket);
-        logger.log("Старт сервера", LOG_FILE_PATH);
         server.runServer();
     }
 }

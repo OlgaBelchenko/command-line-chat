@@ -9,7 +9,8 @@ import java.text.SimpleDateFormat;
 public class Logger {
     private static Logger instance = null;
 
-    private Logger(){}
+    private Logger() {
+    }
 
     public void log(String msg, String filePath) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());

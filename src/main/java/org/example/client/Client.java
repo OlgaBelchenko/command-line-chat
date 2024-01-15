@@ -17,7 +17,10 @@ public class Client {
     private String userName;
     private final String EXIT_COMMAND = "/exit";
     private static final Logger logger = Logger.getInstance();
-    private static final String LOG_FILE_PATH = "src/main/resources/cllog.txt";
+    private static final String LOG_FILE_PATH = "src/main/resources/client_log.txt";
+    private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
+    private static final String PORT = "port";
+    private static final String HOST = "host";
 
 
     public Client(Socket socket, String userName) {
@@ -36,17 +39,17 @@ public class Client {
             out.write(userName);
             out.newLine();
             out.flush();
-        Scanner scanner = new Scanner(System.in);
-        while (!socket.isClosed()) {
-            String message = scanner.nextLine();
-            out.write(message);
-            out.newLine();
-            out.flush();
-            logger.log(message, LOG_FILE_PATH);
-            if (EXIT_COMMAND.equals(message)) {
-                shutdownClient();
+            Scanner scanner = new Scanner(System.in);
+            while (!socket.isClosed()) {
+                String message = scanner.nextLine();
+                out.write(message);
+                out.newLine();
+                out.flush();
+                logger.log(message, LOG_FILE_PATH);
+                if (EXIT_COMMAND.equals(message)) {
+                    shutdownClient();
+                }
             }
-        }
         } catch (IOException e) {
             shutdownClient();
         }
@@ -87,6 +90,24 @@ public class Client {
         }
     }
 
+    private static Socket getSocket() throws IOException {
+        SettingsReader sr = new SettingsReader(SETTINGS_FILE_PATH);
+        String host = sr.getSetting(HOST);
+        if (host.isEmpty()) {
+            throw new IllegalArgumentException("Параметра host нет в файле настроек!)");
+        }
+        String port = sr.getSetting(PORT);
+        if ("".equals(port)) {
+            throw new IllegalArgumentException("Параметра port нет в файле настроек!)");
+        }
+
+        return new Socket(host, Integer.parseInt(port));
+    }
+
+    private static boolean isUserNameCorrect(String userName) {
+        return userName.length() >= 2 && userName.length() <= 13;
+    }
+
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String enterYourName = "Введите свое имя:";
@@ -107,20 +128,4 @@ public class Client {
         client.sendMessage();
     }
 
-    private static Socket getSocket() throws IOException {
-        SettingsReader sr = new SettingsReader();
-        String host = sr.getHost();
-        if (host.isEmpty()) {
-            throw new IllegalArgumentException("Параметра host нет в файле настроек!)");
-        }
-        int port = sr.getPort();
-        if (port == -1) {
-            throw new IllegalArgumentException("Параметра port нет в файле настроек!)");
-        }
-        return new Socket(host, port);
-    }
-
-    private static boolean isUserNameCorrect(String userName) {
-        return userName.length() >= 2 && userName.length() <= 13;
-    }
 }

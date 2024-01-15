@@ -11,7 +11,7 @@ public class ClientManager implements Runnable {
     private static final List<ClientManager> clients = new ArrayList<>();
     private static final Logger logger = Logger.getInstance();
     private final String EXIT_COMMAND = "/exit";
-    private static final String LOG_FILE_PATH = "src/main/resources/srvlog.txt";
+    private final String LOG_FILE_PATH = "src/main/resources/srv_log.txt";
 
     private final Socket socket;
     private BufferedReader in;
