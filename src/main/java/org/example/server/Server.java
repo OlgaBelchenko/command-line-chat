@@ -11,27 +11,53 @@ import java.util.Scanner;
 import static java.lang.System.exit;
 
 public class Server {
-    private static final String PORT = "12345";
-    private static final String HOST = "127.0.0.1";
+    private static final String DEFAULT_PORT = "8080";
+    private static final String DEFAULT_HOST = "127.0.0.1";
     private static final String LOG_FILE_PATH = "src/main/resources/srv_log.txt";
     private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
     private static final Logger logger = Logger.getInstance();
-    private final ServerSocket serverSocket;
+    private String port;
+    private String host;
+    private ServerSocket serverSocket;
     private Socket socket;
 
     public Server() {
+        setPort(DEFAULT_PORT);
+        setHost(DEFAULT_HOST);
+        writeSettingsToFile();
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+        updateServerSocket();
+        writeSettingsToFile();
+    }
+
+    private void updateServerSocket() {
         try {
-            this.serverSocket = new ServerSocket(Integer.parseInt(PORT));
-            writeSettingsToFile();
+            this.serverSocket = new ServerSocket(Integer.parseInt(port));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+        writeSettingsToFile();
+    }
+
     private void writeSettingsToFile() {
         SettingsWriter settings = new SettingsWriter(SETTINGS_FILE_PATH);
-        settings.writeSetting("port", PORT);
-        settings.writeSetting("host", HOST);
+        settings.writeSetting("port", port);
+        settings.writeSetting("host", host);
     }
 
     public void runServer() {

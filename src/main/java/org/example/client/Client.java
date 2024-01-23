@@ -13,22 +13,25 @@ import static java.lang.System.exit;
 
 public class Client {
 
-    private Socket socket;
-    private BufferedReader in;
-    private BufferedWriter out;
-    private String userName;
     private static final String EXIT_COMMAND = "/exit";
     private static final Logger logger = Logger.getInstance();
     private static final String LOG_FILE_PATH = "src/main/resources/client_log.txt";
     private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
     private static final String PORT_SETTING = "port";
     private static final String HOST_SETTING = "host";
-
+    private final Socket socket;
+    private BufferedReader in;
+    private BufferedWriter out;
+    private final String userName;
 
     public Client() {
+        userName = getUserNameFromUser();
         try {
-            userName = getUserNameFromUser();
             socket = getSocketFromFile();
+        } catch (IOException e) {
+            throw new RuntimeException("Сервер не запущен!");
+        }
+        try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {

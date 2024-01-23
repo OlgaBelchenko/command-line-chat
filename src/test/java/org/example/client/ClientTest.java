@@ -2,6 +2,7 @@ package org.example.client;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -11,9 +12,15 @@ class ClientTest {
 
     @Test
     void test_new_client_server_not_running_exception_thrown() {
-        assertThrows(IOException.class, () -> {
-            new Client(new Socket("localhost", 12345), "Username");
+        assertThrows(RuntimeException.class, () -> {
+            provideInput("");
+            new Client();
         });
+    }
+
+    void provideInput(String data) {
+        ByteArrayInputStream testIn = new ByteArrayInputStream(data.getBytes());
+        System.setIn(testIn);
     }
 
 }
