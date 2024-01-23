@@ -19,8 +19,19 @@ public class Server {
     private final ServerSocket serverSocket;
     private Socket socket;
 
-    public Server(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+    public Server() {
+        try {
+            this.serverSocket = new ServerSocket(Integer.parseInt(PORT));
+            writeSettingsToFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void writeSettingsToFile() {
+        SettingsWriter settings = new SettingsWriter(SETTINGS_FILE_PATH);
+        settings.writeSetting("port", PORT);
+        settings.writeSetting("host", HOST);
     }
 
     public void runServer() {
@@ -68,15 +79,6 @@ public class Server {
             logger.log(e.getMessage(), LOG_FILE_PATH);
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        SettingsWriter settings = new SettingsWriter(SETTINGS_FILE_PATH);
-        settings.writeSetting("port", PORT);
-        settings.writeSetting("host", HOST);
-        ServerSocket serverSocket = new ServerSocket(Integer.parseInt(PORT));
-        Server server = new Server(serverSocket);
-        server.runServer();
     }
 }
 

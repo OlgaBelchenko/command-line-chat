@@ -17,29 +17,18 @@ public class Client {
     private BufferedReader in;
     private BufferedWriter out;
     private String userName;
-    private final String EXIT_COMMAND = "/exit";
-    private final Logger logger = Logger.getInstance();
-    private final String LOG_FILE_PATH = "src/main/resources/client_log.txt";
-    private final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
-    private final String PORT_PARAMETER = "port";
-    private final String HOST_PARAMETER = "host";
+    private static final String EXIT_COMMAND = "/exit";
+    private static final Logger logger = Logger.getInstance();
+    private static final String LOG_FILE_PATH = "src/main/resources/client_log.txt";
+    private static final String SETTINGS_FILE_PATH = "src/main/resources/settings.txt";
+    private static final String PORT_SETTING = "port";
+    private static final String HOST_SETTING = "host";
 
 
     public Client() {
         try {
             userName = getUserNameFromUser();
             socket = getSocketFromFile();
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        } catch (IOException e) {
-            shutdownClient();
-        }
-    }
-
-    public Client(Socket socket) {
-        try {
-            userName = getUserNameFromUser();
-            this.socket = socket;
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {
@@ -110,11 +99,11 @@ public class Client {
 
     private Socket getSocketFromFile() throws IOException {
         SettingsReader sr = new SettingsReader(SETTINGS_FILE_PATH);
-        String host = sr.getSetting(HOST_PARAMETER);
+        String host = sr.getSetting(HOST_SETTING);
         if (host.isEmpty()) {
             throw new IllegalArgumentException("Параметра host нет в файле настроек!)");
         }
-        String port = sr.getSetting(PORT_PARAMETER);
+        String port = sr.getSetting(PORT_SETTING);
         if ("".equals(port)) {
             throw new IllegalArgumentException("Параметра port нет в файле настроек!)");
         }
@@ -127,7 +116,6 @@ public class Client {
     }
 
     public void start() {
-//        userName = getUserNameFromUser();
         listenToMessage();
         sendMessage();
     }
